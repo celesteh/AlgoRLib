@@ -672,7 +672,7 @@ DubLive : DubInstrument{
 		numchannels = inumchannels;
 		fx = dub.fx;
 		rindex = 0;
-		bufs = [ fx.makeBuffer(numchannels, name++rindex)];
+		bufs = [ fx.makeBuffer(1, name++rindex)];
 		pindex = -1;
 		isRecording = false;
 		semaphore = Semaphore();
@@ -682,22 +682,27 @@ DubLive : DubInstrument{
 	}
 
 	record {|clock|
+		var evt;
 		clock.isKindOf(ExternalClock).if({
 			clock = clock.tempoclock
 		});
 		{
 			semaphore.wait;
 			isRecording = true;
-			bufs = bufs.add(fx.makeBuffer(numchannels, name++rindex));
-			(instrument: \record++numchannels,
+			bufs = bufs.add(fx.makeBuffer(1, name++rindex));
+			evt = (instrument: \record1,
 				bufnum: bufs[rindex],
 				dur: clock.tempo * dub.loop,
-				in: in
-			).play(clock, [1,0]);
+				in: in,
+				legato:1
+			);
+			evt.dump;
+			evt.postln;
+			evt.play(clock, [1,0]);
 			clock.playNextBar({
 				"recording".postln;
 				{
-					(clock.tempo * dub.loop).wait;
+					(clock.tempo * dub.loop/2).wait;
 					clock.playNextBar({
 						"stopped".postln;
 						pindex = rindex;
@@ -729,6 +734,18 @@ DubLive : DubInstrument{
 			bufs.clipAt(pindex).plot
 		});
 
+	}
+
+	- {|i|
+		{
+			// record over the last buffer
+			semaphore.wait;
+			(rindex > 0).if({
+				rindex = rindex -1;
+				pindex = pindex.min(rindex -1);
+			});
+			semaphore.signal;
+		}.fork;
 	}
 
 }

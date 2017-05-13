@@ -741,7 +741,7 @@ DubFx {
 	*initClass{
 
 		StartUp.add {
-			SynthDef(\dubfx, {|out = 0, amp=0.2, in=0, gate = 1, tempo=1|
+			SynthDef(\dubfx, {|out = 0, amp=1, in=2, gate = 1, tempo=1|
 
 				var trig, note, son, sweep, mul, env, input, follower;
 
@@ -759,6 +759,14 @@ DubFx {
 				)).exprange(40, 5000);
 
 				son = input; // Pulse.ar(note * [0.99, 1, 1.01]).sum;
+
+
+				son = PitchShift.ar(son, pitchRatio:
+							[Rand(0.97, 0.99), Rand(1.01, 1.03)],
+							pitchDispersion:[Rand(0, 0.01), Rand(0, 0.01)]
+						).sum + son;
+
+
 				son = LPF.ar(son, sweep);
 				son = Normalizer.ar(son);
 				son = son + BPF.ar(son, 2000, 2);
@@ -823,7 +831,7 @@ DubFx {
 
 			2.do({|i|
 
-				SynthDef(\loopfx++(i+1), {|out = 0, amp=0.2, tempo=1, gate = 0, freq=440, bufnum|
+				SynthDef(\loopfx++(i+1), {|out = 0, amp=1, tempo=1, gate = 1, freq=440, bufnum=2|
 
 					var trig, son, sweep, mul, env, loudness;
 
@@ -842,12 +850,19 @@ DubFx {
 
 					son = PlayBuf.ar(i+1, bufnum, BufRateScale.kr(bufnum), loop:1);
 
+					/*
 					son = Select.ar(TRand.kr(trig: trig) < 0.05, [son,
 						PitchShift.ar(son, pitchRatio:
 							[Rand(0.97, 0.99), Rand(1.01, 1.03)],
 							pitchDispersion:[Rand(0, 0.01), Rand(0, 0.01)]
 						).sum + son
 					]);
+					*/
+
+					son = PitchShift.ar(son, pitchRatio:
+							[Rand(0.97, 0.99), Rand(1.01, 1.03)],
+							pitchDispersion:[Rand(0, 0.01), Rand(0, 0.01)]
+						).sum + son;
 
 					son = LPF.ar(son, sweep);
 					son = Normalizer.ar(son);
@@ -1042,7 +1057,7 @@ DubFx {
 				SynthDef(\record1, {|in=2, gate=1, bufnum=2|
 					var env, input, rec;
 
-					input = AudioIn.ar(in);
+					input = SoundIn.ar(in);
 					env = EnvGen.kr(Env.asr(0.01, releaseTime:0.01), gate, doneAction:2);
 					input = input * env;
 					rec = RecordBuf.ar(input,bufnum, preLevel:1);
@@ -1051,7 +1066,7 @@ DubFx {
 			SynthDef(\record2, {|in=2, gate=1, bufnum=2|
 					var env, input, rec;
 
-				input = [AudioIn.ar(in), AudioIn.ar(in+1)];
+				input = [SoundIn.ar(in), SoundIn.ar(in+1)];
 					env = EnvGen.kr(Env.asr(0.01, releaseTime:0.01), gate, doneAction:2);
 					input = input * env;
 					rec = RecordBuf.ar(input,bufnum, preLevel:1);
