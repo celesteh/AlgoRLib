@@ -1,0 +1,17 @@
+(
+	name: 		"AlgoRLib",
+	summary:		"Manage loops for live coding and algorave",
+	author: 		"Charles Celeste Hutchins",
+
+	version:		0.11, // must be a float
+	organization: 	"University of Kent",
+	country: 		"UK",
+	since: 		"2016",
+	//helpdoc: "Help/AlgoRLib.html",
+	url:           "https://github.com/celesteh/AlgoRLib",
+    //schelp: "AlgoRLib",
+    dependencies: ["BBCut"],
+    status:                "alpha",
+    license: "GPL",
+    copyright: "Charles Hutchins 2016-2022"
+)
